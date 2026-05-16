@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import './App.css'
 
 type KeyMap = Record<string, boolean>
@@ -46,6 +47,7 @@ function App() {
   const lastTimeRef = useRef<number>(0)
   const pausedRef = useRef(true)
   const winnerRef = useRef<string | null>(null)
+  const activePointersRef = useRef<Record<number, 'left' | 'right'>>({})
   const ballRef = useRef<BallState>(freshBall(1))
   const leftRef = useRef<PaddleState>({ y: FIELD_HEIGHT / 2 - PADDLE_HEIGHT / 2, score: 0 })
   const rightRef = useRef<PaddleState>({
@@ -80,6 +82,7 @@ function App() {
   const resetMatch = () => {
     leftRef.current = { y: FIELD_HEIGHT / 2 - PADDLE_HEIGHT / 2, score: 0 }
     rightRef.current = { y: FIELD_HEIGHT / 2 - PADDLE_HEIGHT / 2, score: 0 }
+    activePointersRef.current = {}
     setScores({ left: 0, right: 0 })
     setMatchWinner(null)
     resetRound(Math.random() > 0.5 ? 1 : -1)
@@ -100,6 +103,66 @@ function App() {
     }
 
     setIsPaused(true)
+  }
+
+  const getCanvasPoint = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (!canvas) return null
+
+    const rect = canvas.getBoundingClientRect()
+    if (!rect.width || !rect.height) return null
+
+    const scaleX = FIELD_WIDTH / rect.width
+    const scaleY = FIELD_HEIGHT / rect.height
+
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY,
+    }
+  }
+
+  const movePaddleTo = (side: 'left' | 'right', y: number) => {
+    const nextY = clamp(y - PADDLE_HEIGHT / 2, 24, FIELD_HEIGHT - 24 - PADDLE_HEIGHT)
+
+    if (side === 'left') {
+      leftRef.current.y = nextY
+      return
+    }
+
+    rightRef.current.y = nextY
+  }
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const point = getCanvasPoint(event)
+    if (!point) return
+
+    const side = point.x < FIELD_WIDTH / 2 ? 'left' : 'right'
+    activePointersRef.current[event.pointerId] = side
+    movePaddleTo(side, point.y)
+
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const side = activePointersRef.current[event.pointerId]
+    if (!side) return
+
+    const point = getCanvasPoint(event)
+    if (!point) return
+
+    movePaddleTo(side, point.y)
+  }
+
+  const releasePointer = (pointerId: number) => {
+    delete activePointersRef.current[pointerId]
+  }
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    releasePointer(event.pointerId)
+  }
+
+  const handlePointerCancel = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    releasePointer(event.pointerId)
   }
 
   useEffect(() => {
@@ -331,7 +394,15 @@ function App() {
 
       <section className="arena-wrap">
         <div className="arena-frame">
-          <canvas ref={canvasRef} className="arena" aria-label="Lapangan tennis" />
+          <canvas
+            ref={canvasRef}
+            className="arena"
+            aria-label="Lapangan tennis"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerCancel}
+          />
         </div>
       </section>
 
