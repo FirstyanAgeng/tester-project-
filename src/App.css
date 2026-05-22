@@ -43,6 +43,18 @@
   color: #7bd6ff;
 }
 
+.match-title {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+  background: linear-gradient(90deg, #7be3ff, #f6d365);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .hero-copy h1 {
   margin: 0;
   font-size: clamp(2.2rem, 4vw, 4.3rem);

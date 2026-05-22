@@ -76,7 +76,6 @@ function App() {
       ? "Siap serve. Tekan Space untuk memulai."
       : "Game berjalan.";
   }, [isPaused, matchWinner]);
-
   useEffect(() => {
     pausedRef.current = isPaused;
   }, [isPaused]);
@@ -271,54 +270,40 @@ function App() {
       const right = rightRef.current;
       const ball = ballRef.current;
 
-      context.fillStyle = "#f6d365";
-      context.shadowColor = "rgba(246, 211, 101, 0.45)";
-      context.shadowBlur = 18;
-
-      context.beginPath();
-      context.roundRect(40, left.y, PADDLE_WIDTH, PADDLE_HEIGHT, 10);
-      context.fill();
-
-      context.beginPath();
-      context.roundRect(
-        FIELD_WIDTH - 40 - PADDLE_WIDTH,
-        right.y,
-        PADDLE_WIDTH,
-        PADDLE_HEIGHT,
-        10,
-      );
-      context.fill();
-
-      // gambar avatar pemain di raket (circular clip)
-      const avatarSize = 48;
-      const drawAvatar = (
+      // draw paddles using player images (no yellow racket)
+      const drawPaddleImage = (
         img: HTMLImageElement | null,
         paddleX: number,
         paddleY: number,
       ) => {
         if (!img || !img.complete || img.naturalWidth === 0) return;
+
+        const targetHeight = PADDLE_HEIGHT * 1.2;
+        const aspect = img.naturalWidth / img.naturalHeight || 1;
+        const targetWidth = Math.max(PADDLE_WIDTH, targetHeight * aspect);
+
         const cx = paddleX + PADDLE_WIDTH / 2;
         const cy = paddleY + PADDLE_HEIGHT / 2;
-        const x = cx - avatarSize / 2;
-        const y = cy - avatarSize / 2;
+        const x = cx - targetWidth / 2;
+        const y = cy - targetHeight / 2;
+        const radius = 12;
 
         context.save();
         context.beginPath();
-        context.arc(cx, cy, avatarSize / 2, 0, Math.PI * 2);
-        context.closePath();
+        context.roundRect(x, y, targetWidth, targetHeight, radius);
         context.clip();
-        context.drawImage(img, x, y, avatarSize, avatarSize);
+        context.drawImage(img, x, y, targetWidth, targetHeight);
         context.restore();
 
         context.beginPath();
         context.lineWidth = 2;
-        context.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-        context.arc(cx, cy, avatarSize / 2, 0, Math.PI * 2);
+        context.strokeStyle = "rgba(255,255,255,0.06)";
+        context.roundRect(x, y, targetWidth, targetHeight, radius);
         context.stroke();
       };
 
-      drawAvatar(leftImgElemRef.current, 40, left.y);
-      drawAvatar(
+      drawPaddleImage(leftImgElemRef.current, 40, left.y);
+      drawPaddleImage(
         rightImgElemRef.current,
         FIELD_WIDTH - 40 - PADDLE_WIDTH,
         right.y,
@@ -453,6 +438,7 @@ function App() {
         <div className="hero-copy">
           <p className="eyebrow">Simple Two Player Tennis</p>
           <h1>Tennis web lokal yang bisa dimainkan berdua</h1>
+          <h2 className="match-title">asik vylera sports</h2>
           <p className="intro">
             Main bareng di satu keyboard. Pemain kiri pakai{" "}
             <strong>W / S</strong>, pemain kanan pakai{" "}
