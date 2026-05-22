@@ -13,7 +13,11 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
     linear-gradient(180deg, rgba(12, 22, 38, 0.92), rgba(9, 13, 23, 0.92)),
-    radial-gradient(circle at top left, rgba(92, 201, 255, 0.14), transparent 32%);
+    radial-gradient(
+      circle at top left,
+      rgba(92, 201, 255, 0.14),
+      transparent 32%
+    );
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(18px);
 }
@@ -64,7 +68,11 @@
 .score-card {
   border-radius: 22px;
   padding: 18px 20px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.03)
+  );
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: grid;
   gap: 10px;
@@ -80,6 +88,22 @@
   font-size: clamp(2.2rem, 5vw, 3.8rem);
   line-height: 1;
   color: #ffffff;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.player-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  object-fit: cover;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.06);
 }
 
 .score-divider {
